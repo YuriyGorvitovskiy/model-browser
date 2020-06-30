@@ -6,6 +6,7 @@ import Grid from "@material-ui/core/Grid";
 import MainClass from "./model-view/class";
 import ClassRelations from "./model-view/class-relations";
 import Spacing from "./model-view/class-header-spacing";
+import Search from "./model-view/search";
 
 import commonStyles from "../styles/css";
 
@@ -63,6 +64,7 @@ const ModelViewer = (props: ModelViewProps): JSX.Element => {
                     <ClassRelations key={i} dir="outgoing" class={t} />
                 ))}
             </Grid>
+            <Search />
         </Grid>
     );
 };
