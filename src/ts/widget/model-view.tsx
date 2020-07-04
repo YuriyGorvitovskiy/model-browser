@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useHistory } from "react-router-dom";
 
 import * as MUS from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
@@ -19,32 +20,37 @@ const useStyles = MUS.makeStyles((theme: MUS.Theme) =>
     })
 );
 
-export interface ModelViewProps {
-    class: {
+export interface ClassInfo {
+    name: string;
+
+    attrs: {
         name: string;
+        type: string;
+    }[];
 
-        attrs: {
+    incoming: {
+        name: string;
+        rels: {
             name: string;
-            type: string;
         }[];
+    }[];
 
-        incoming: {
+    outgoing: {
+        name: string;
+        rels: {
             name: string;
-            rels: {
-                name: string;
-            }[];
         }[];
+    }[];
+}
 
-        outgoing: {
-            name: string;
-            rels: {
-                name: string;
-            }[];
-        }[];
-    };
+export interface ModelViewProps {
+    classes: string[];
+    class: ClassInfo;
+    classRoute: (className: string) => string;
 }
 
 const ModelViewer = (props: ModelViewProps): JSX.Element => {
+    const history = useHistory();
     const classes = useStyles();
 
     return (
@@ -64,7 +70,11 @@ const ModelViewer = (props: ModelViewProps): JSX.Element => {
                     <ClassRelations key={i} dir="outgoing" class={t} />
                 ))}
             </Grid>
-            <Search />
+            <Search
+                names={props.classes}
+                selected={props.class.name}
+                onSelect={(c) => history.push(props.classRoute(c))}
+            />
         </Grid>
     );
 };
