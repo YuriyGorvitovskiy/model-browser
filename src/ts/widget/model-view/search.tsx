@@ -14,21 +14,21 @@ import SearchIcon from "@material-ui/icons/Search";
 import CloseIcon from "@material-ui/icons/Close";
 
 import commonStyles from "../../styles/css";
-import { typography } from "material-ui/styles";
 
 const useStyles = MUS.makeStyles((theme: MUS.Theme) =>
     MUS.createStyles({
         ...commonStyles(theme),
         buble: {
-            position: "absolute",
+            position: "fixed",
             top: theme.spacing(2),
             right: theme.spacing(2),
         },
         name: {
             margin: theme.spacing(1),
+            cursor: "pointer",
         },
         panel: {
-            position: "absolute",
+            position: "fixed",
             top: theme.spacing(2),
             right: theme.spacing(2),
             bottom: theme.spacing(2),
@@ -50,23 +50,24 @@ const useStyles = MUS.makeStyles((theme: MUS.Theme) =>
     })
 );
 interface Props {
+    expand: boolean;
     names: string[];
-    selected: string;
+    onExpand: (expand: boolean) => void;
     onSelect: (name: string) => void;
+    selected: string;
 }
 const ModelViewerSearch = (props: Props): JSX.Element => {
     const classes = useStyles();
-    const [showSearch, setShowSearch] = React.useState(false);
     const [filter, setFilter] = React.useState("");
 
-    if (!showSearch) {
+    if (!props.expand) {
         return (
             <Tooltip title="search" aria-label="search">
                 <Fab
                     className={classes.buble}
                     onClick={(e) => {
                         e.preventDefault();
-                        setShowSearch(true);
+                        props.onExpand(true);
                     }}
                     size="small"
                 >
@@ -96,7 +97,7 @@ const ModelViewerSearch = (props: Props): JSX.Element => {
                     className={classes.inputButton}
                     onClick={(e) => {
                         e.preventDefault();
-                        setShowSearch(false);
+                        props.onExpand(false);
                     }}
                 >
                     <CloseIcon color="error" />
@@ -106,7 +107,7 @@ const ModelViewerSearch = (props: Props): JSX.Element => {
             <Box className={classes.stretch_vertically}>
                 <Grid container direction="column" wrap="nowrap" className={classes.scrollable}>
                     {props.names
-                        .filter((n) => !filter || n.indexOf(filter) >= 0)
+                        .filter((n) => !filter || n.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
                         .map((n, i) => (
                             <Grid
                                 className={`${classes.stretch_horizontally} ${

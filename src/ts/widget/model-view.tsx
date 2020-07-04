@@ -10,12 +10,16 @@ import Spacing from "./model-view/class-header-spacing";
 import Search from "./model-view/search";
 
 import commonStyles from "../styles/css";
+import useLocalStorage from "./use-local-storage";
 
 const useStyles = MUS.makeStyles((theme: MUS.Theme) =>
     MUS.createStyles({
         ...commonStyles(theme),
         root: {
             padding: theme.spacing(2),
+        },
+        search_expand: {
+            paddingRight: "332px",
         },
     })
 );
@@ -52,9 +56,15 @@ export interface ModelViewProps {
 const ModelViewer = (props: ModelViewProps): JSX.Element => {
     const history = useHistory();
     const classes = useStyles();
+    const [search, setSearch] = useLocalStorage("model-view.expand-search", false);
 
     return (
-        <Grid container direction="row" wrap="nowrap" className={classes.stretch_horizontally + " " + classes.root}>
+        <Grid
+            container
+            direction="row"
+            wrap="nowrap"
+            className={`${classes.stretch_horizontally} ${classes.root} ${search ? classes.search_expand : ""}`}
+        >
             <Grid item xs={4} container direction="column" wrap="nowrap">
                 <Spacing />
                 {props.class.incoming.map((s, i) => (
@@ -72,8 +82,10 @@ const ModelViewer = (props: ModelViewProps): JSX.Element => {
             </Grid>
             <Search
                 names={props.classes}
-                selected={props.class.name}
                 onSelect={(c) => history.push(props.classRoute(c))}
+                selected={props.class.name}
+                expand={search}
+                onExpand={setSearch}
             />
         </Grid>
     );
