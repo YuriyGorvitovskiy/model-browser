@@ -2,15 +2,21 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import * as Router from "react-router-dom";
 
-import Viewer from "./mapper/model-view";
+import ModelViewer from "./mapper/model-view";
+import DataViewer from "./mapper/data-view";
 
 const Root = () => {
     return (
         <Router.HashRouter>
             <Router.Switch>
-                <Router.Route path="/:class_name" component={Viewer} />
-                <Router.Route path="/">
-                    <Router.Redirect to="/jexkg" />
+                <Router.Route path="/record/:schema/:table/:id">
+                    <DataViewer />
+                </Router.Route>
+                <Router.Route path="/model/:class_name">
+                    <ModelViewer />
+                </Router.Route>
+                <Router.Route path="">
+                    <Router.Redirect to="/model/class" />
                 </Router.Route>
             </Router.Switch>
         </Router.HashRouter>

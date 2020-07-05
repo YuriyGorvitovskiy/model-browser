@@ -4,6 +4,7 @@ import * as React from "react";
 import * as Router from "react-router-dom";
 
 import Widget, { ClassInfo } from "../widget/model-view";
+import requestClass from "../request/class";
 
 const dummyClassInfo = (name: string): ClassInfo => ({
     name,
@@ -11,35 +12,16 @@ const dummyClassInfo = (name: string): ClassInfo => ({
     incoming: [],
     outgoing: [],
 });
+
 const requestClassInfo = async (class_name: string, set: (i: ClassInfo) => void) => {
-    const jql = {
-        $type: "class",
-        label: class_name,
-        "^class:attribute": {
-            label: {},
-            type: {},
-            "target:class": {
-                label: {},
-            },
-        },
-        "^target:attribute": {
-            label: {},
-            "class:class": {
-                label: {},
-            },
-        },
-    };
+    const response = await requestClass(null, class_name);
 
-    const response = await axios.post("/jql/model", JSON.stringify(jql), {
-        headers: { "Content-Type": "application/json" },
-    });
-
-    const attrs = response.data[0]["^class:attribute"]
+    const attrs = response["^class:attribute"]
         .filter((a) => "reference" !== a.type || null == a["target:class"])
         .map((a) => ({ name: a.label, type: a.type }))
         .sort((a, b) => a.name.localeCompare(b.name));
 
-    const outgoing: { [key: string]: string[] } = response.data[0]["^class:attribute"]
+    const outgoing: { [key: string]: string[] } = response["^class:attribute"]
         .filter((a) => "reference" === a.type && null != a["target:class"])
         .reduce((a, r) => {
             const target = r["target:class"].label;
@@ -48,7 +30,7 @@ const requestClassInfo = async (class_name: string, set: (i: ClassInfo) => void)
             return a;
         }, {});
 
-    const incoming: { [key: string]: string[] } = response.data[0]["^target:attribute"].reduce((a, r) => {
+    const incoming: { [key: string]: string[] } = response["^target:attribute"].reduce((a, r) => {
         const target = r["class:class"].label;
         const clazz = (a[target] = a[target] || []);
         clazz.push(r.label);
@@ -56,7 +38,7 @@ const requestClassInfo = async (class_name: string, set: (i: ClassInfo) => void)
     }, {});
 
     set({
-        name: response.data[0].label,
+        name: response.label,
         attrs,
         incoming: Object.entries(incoming)
             .map(([c, r]) => ({ name: c, rels: r.sort().map((a) => ({ name: a })) }))
@@ -66,6 +48,7 @@ const requestClassInfo = async (class_name: string, set: (i: ClassInfo) => void)
             .sort((a, b) => a.name.localeCompare(b.name)),
     });
 };
+
 const requestClasses = async (set: (c: string[]) => void) => {
     const jql = {
         $type: "class",
@@ -93,7 +76,7 @@ const ModelViewMapper = (): JSX.Element => {
         setClassInfo(() => dummyClassInfo(class_name));
         requestClassInfo(class_name, setClassInfo);
     }
-    return <Widget class={classInfo} classes={classes} classRoute={(c) => "/" + c} />;
+    return <Widget class={classInfo} classes={classes} classRoute={(c) => "/model/" + c} />;
 };
 
 export default ModelViewMapper;
