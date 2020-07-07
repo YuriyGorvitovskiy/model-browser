@@ -4,6 +4,7 @@ import * as React from "react";
 import * as Router from "react-router-dom";
 
 import requestClass from "../request/class";
+import RecordViewer, { Record } from "../widget/record-view";
 
 interface Model {
     schema: string;
@@ -19,34 +20,7 @@ interface Model {
         schema: string;
         table: string;
         column: string;
-    }[]; // source: schema,class,attribute
-}
-
-interface Record {
-    schema: string;
-    table: string;
-    id: string;
-    columns: {
-        column: string;
-        type: string;
-        value: boolean | number | string;
-    }[];
-    outgoing: {
-        column: string;
-        schema: string;
-        table: string;
-        id: string;
-        name: string;
-    }[];
-    incoming: {
-        schema: string;
-        table: string;
-        column: string;
-        refs: {
-            id: string;
-            name: string;
-        }[];
-    }[];
+    }[]; // source: schema, class, attribute
 }
 
 const requestModel = async (schema: string, table: string): Promise<Model> => {
@@ -104,28 +78,29 @@ const requestRecord = async (schema: string, table: string, id: string, setRecor
         schema: model.schema,
         table: model.table,
         id: response.id,
-        columns: Object.entries(model.columns)
-            .map(([a, t]) => ({ column: a, type: t, value: response[a] }))
-            .sort((a, b) => a.column.localeCompare(b.column)),
+        name: response.label,
+        fields: Object.entries(model.columns)
+            .map(([a, t]) => ({ name: a, type: t, value: response[a] }))
+            .sort((a, b) => a.name.localeCompare(b.name)),
         outgoing: Object.entries(model.outgoing)
             .map(([a, o]) => ({
-                column: a,
+                field: a,
                 schema: o.schema,
                 table: o.table,
-                id: response[a + ":" + o.table].id,
-                name: response[a + ":" + o.table].label,
+                id: response[a + ":" + o.table]?.id,
+                name: response[a + ":" + o.table]?.label,
             }))
-            .sort((a, b) => a.table.localeCompare(b.table) || a.column.localeCompare(b.column)),
+            .sort((a, b) => a.table.localeCompare(b.table) || a.field.localeCompare(b.field)),
         incoming: model.incoming
             .map((i) => ({
                 schema: i.schema,
                 table: i.table,
-                column: i.column,
+                field: i.column,
                 refs: response["^" + i.column + ":" + i.table]
                     .map((r) => ({ id: r.id, name: r.label }))
                     .sort((a, b) => a.name.localeCompare(b.name)),
             }))
-            .sort((a, b) => a.table.localeCompare(b.table) || a.column.localeCompare(b.column)),
+            .sort((a, b) => a.table.localeCompare(b.table) || a.field.localeCompare(b.field)),
     };
 
     setRecord(record);
@@ -140,12 +115,7 @@ const DataViewMapper = (): JSX.Element => {
         requestRecord(schema, table, id, setRecord);
     }, [schema, table, id]);
 
-    return (
-        <div>
-            <h1>Record</h1>
-            <pre>{JSON.stringify(record, null, 4)}</pre>
-        </div>
-    );
+    return <RecordViewer record={record} />;
 };
 
 export default DataViewMapper;

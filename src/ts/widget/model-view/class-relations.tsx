@@ -35,7 +35,7 @@ const ModelViewerClassRelations = (props: Props): JSX.Element => {
     const classBox = (
         <Grid item xs={6}>
             <Card className={classes.stretch_both + " " + classes.center} variant="outlined">
-                <Router.Link to={"/" + props.class.name}>
+                <Router.Link to={"/model/" + props.class.name}>
                     <Typography variant="h6">{props.class.name}</Typography>
                 </Router.Link>
             </Card>

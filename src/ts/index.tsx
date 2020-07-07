@@ -3,14 +3,14 @@ import * as ReactDOM from "react-dom";
 import * as Router from "react-router-dom";
 
 import ModelViewer from "./mapper/model-view";
-import DataViewer from "./mapper/data-view";
+import RecordViewer from "./mapper/record-view";
 
 const Root = () => {
     return (
         <Router.HashRouter>
             <Router.Switch>
                 <Router.Route path="/record/:schema/:table/:id">
-                    <DataViewer />
+                    <RecordViewer />
                 </Router.Route>
                 <Router.Route path="/model/:class_name">
                     <ModelViewer />
